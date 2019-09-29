@@ -2,25 +2,28 @@
 ;; about the language level of this file in a form that our tools can easily process.
 #reader(lib "htdp-advanced-reader.ss" "lang")((modname |HW #3.5|) (read-case-sensitive #t) (teachpacks ()) (htdp-settings #(#t constructor repeating-decimal #t #t none #f () #f)))
 (define myProgram ; array/list of instructions
-  '( ; <-- one quote on the outside, we don't need any quotes for the registers
-  ;(addi t0 zero 1)
-  ;(sw t0 8192) ; store the value that is currently at t0 (1) into 8192
-  ;(lw t1 8196)
-  ;(j myLabel)
-  ;(myLabel addi t0 zero 5)
-  ;(j myLabel2)
-  ;(myLabel2)
-  ;(addi t2 zero 7)
-  (jal getInput) 
-  (lw t0 8196) 
-  (jr Done)
-  (getInput) 
-  (addi t0 zero 1) 
-  (sw t0 8192) 
-  (jr ra) ; jumps to what is in ra (0), plus 1, which is line (lw t0 8196)
-  (Done) 
-  
+  '(
+    (addi t1 zero 1)
+    (sw t1 8192)
+    (lw t2 8196) ; value 1 is stored in t2
+    (sw t1 8192)
+    (lw t3 8196) ; value 2 is stored in t3
+
+    (slt t4 t2 t3) ; t4 will be set to a 1 if t2 is smaller than t3, otherwise t4 will hold a zero
+    (beq t4 zero T3Smaller) ; if t4 is equal to zero, then t3 is the smaller value
+    (add t1 t2 1) ; store into t1 the value of t2
+    (add t2 t3 zero) ; store into t2 the value of t3
+    (j Loop)
+    (add t1 t3 1) 
+    (T3Smaller)
+    (Loop)
+    (beq t1 t2 Done)
+    (sw t1 8200)
+    (addi t1 t1 1)
+    (j Loop)
+    (Done)
   ))
+(mypzyCPU myProgram)
 
 (define mipzyFindLabel
   (lambda (prog label pos)
